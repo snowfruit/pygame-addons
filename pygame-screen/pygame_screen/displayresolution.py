@@ -6,7 +6,11 @@ from enum import *
 
 
 class DisplayResolution(Enum):
-    """Enum-class with display resolutions."""
+    """Enum-class with display resolutions.
+    Note:
+        https://emulation.gametechwiki.com/index.php/Resolution
+        https://en.wikipedia.org/wiki/List_of_common_resolutions
+    """
 
     A2600 = (160, 192)
     DS = (256, 192)
@@ -30,3 +34,9 @@ class DisplayResolution(Enum):
     VGA = (640, 480)
     WVGA = (768, 480)
     WXGA = (1280, 720)
+
+
+if __name__ == "__main__":
+    print("Available display resolutions.")
+    for ds in DisplayResolution:
+        print(ds, ds.value)

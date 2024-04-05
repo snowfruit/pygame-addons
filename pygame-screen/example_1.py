@@ -1,4 +1,5 @@
 import math
+from random import *
 import pygame
 
 from pygame_screen import *
@@ -19,7 +20,7 @@ def main():
     # Use the screen with a retro-preset.
     screen = ScreenRetroContain(window_size)
 
-    pygame.display.set_caption("Pygame - CustomScreen")
+    pygame.display.set_caption(screen.__class__.__name__)
 
     running = True
 
@@ -42,9 +43,29 @@ def main():
                 if event.key == pygame.K_6:
                     screen = ScreenModernFill(window_size)
                 if event.key == pygame.K_7:
+                    # Create a ScreemFixed with random scale and position.
+                    screen = ScreenFixed(window_size)
+
+                    # Set new random scale.
+                    screen.scale_x = 0.5 + random()
+                    screen.scale_y = 0.5 + random()
+
+                    # Set new random position.
+                    x = randrange(window_size[0])
+                    y = randrange(window_size[1])
+                    screen.position = (x, y)
+                if event.key == pygame.K_8:
+                    # Create a ScreemFixed with random scale.
+                    screen = ScreenFixedCenter(window_size)
+
+                    # Set new random scale.
+                    screen.scale_x = 0.5 + random()
+                    screen.scale_y = 0.5 + random()
+                if event.key == pygame.K_9:
                     screen = ScreenMatch(window_size)
 
                 print(screen.__class__.__name__)
+                pygame.display.set_caption(screen.__class__.__name__)
 
         # Update the screen. Size, scale and everything else.
         screen.update()

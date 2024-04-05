@@ -22,20 +22,22 @@ class ScreenContain(Screen):
     def update_scale(self) -> None:
         super().update_scale()
 
-        # Modify scale to contain inside screen-surface.
-        if self.use_integer_scaling:
-            self.scale_x = math.floor(self.scale_x)
-            self.scale_y = math.floor(self.scale_y)
+        # 'Contain' needs scale_x and scale_y to be the same value.
 
         # Set scale to the smallest of width and height.
-        self.scale = min(self.scale_x, self.scale_y)
+        new_scale = min(self.scale_x, self.scale_y)
 
         # Set scale to a minimum of 1.
-        self.scale = max(self.scale, 1)
+        # TODO: Add clamping feature.
+        new_scale = max(new_scale, 1)
 
-        # 'contain' mouse needs scale_x and scale_y to be the same as scale.
-        self.scale_x = self.scale
-        self.scale_y = self.scale
+        if self.use_integer_scaling:
+            # Set scale to a minimum of 1.
+            new_scale = max(new_scale, 1)
+            new_scale = math.floor(new_scale)
+
+        # Set scale_x and scale_y to the same value.
+        self.scale = (new_scale, new_scale)
 
 
 class ScreenFill(Screen):
@@ -53,13 +55,10 @@ class ScreenFill(Screen):
 
     def update_scale(self) -> None:
         super().update_scale()
-        # Fill use scale_x and scale_y for mouse postion, not rendering.
-
-        # Fill do not use 'scale'.
-        self.scale = 1
+        # 'Fill' use scale_x and scale_y for mouse postion, not rendering.
 
     def update_position(self) -> None:
-        # FILL always use 0, 0.
+        # 'Fill' always use 0, 0.
         self.position = (0, 0)
 
     def update_canvas_scaled(self) -> None:
@@ -89,19 +88,22 @@ class ScreenCover(Screen):
         super().update_scale()
 
         # Scale to cover screen-surface.
-        if self.use_integer_scaling:
-            self.scale_x = math.ceil(self.scale_x)
-            self.scale_y = math.ceil(self.scale_y)
 
+        # 'Cover' needs scale_x and scale_y to be the same value.
         # Set scale to the biggest of width and height.
-        self.scale = max(self.scale_x, self.scale_y)
+        new_scale = max(self.scale_x, self.scale_y)
 
         # Set scale to a minimum of 1.
-        self.scale = max(self.scale, 1)
+        # TODO: Add clamping feature.
+        new_scale = max(new_scale, 1)
 
-        # 'cover' mouse needs scale_x and scale_y to be the same as scale.
-        self.scale_x = self.scale
-        self.scale_y = self.scale
+        if self.use_integer_scaling:
+            # Set scale to a minimum of 1.
+            new_scale = max(new_scale, 1)
+            new_scale = math.ceil(new_scale)
+
+        # Set scale_x and scale_y to the same value.
+        self.scale = (new_scale, new_scale)
 
 
 class ScreenMatch(Screen):
@@ -119,26 +121,46 @@ class ScreenMatch(Screen):
             self.canvas = pygame.Surface(self.screen.get_size())
 
     def update_scale(self) -> None:
-        # Match-fit use a canvas-surface and screen-surface of the same size.
+        # 'Match' use a canvas-surface and screen-surface of the same size.
         # No scaling is done.
-        self.scale = 1
-        self.scale_x = 1
-        self.scale_y = 1
+        self.scale = (1, 1)
 
     def update_position(self) -> None:
-        # Match-fit always use 0, 0.
+        # 'Match' always use 0, 0.
         self.position = (0, 0)
 
     def update_canvas_scaled(self) -> None:
-        # Match-fit use a copy of the canvas-surface. No change in size is needed.
+        # 'Match' use a copy of the canvas-surface. No change in size is needed.
         self.canvas_scaled = self.canvas.copy()
 
     def position_canvas_to_screen(self, position: tuple[int, int]) -> tuple[int, int]:
-        # For match-fit the canvas-postion and screen-position are the same.
+        # For 'match' the canvas-postion and screen-position are the same.
         return position
 
     def position_screen_to_canvas(
         self, position: tuple[int, int], clamp: bool = True
     ) -> tuple[int, int]:
-        # For match-fit the canvas-postion and screen-position are the same.
+        # For 'match' the canvas-postion and screen-position are the same.
         return position
+
+
+class ScreenFixed(Screen):
+    """Based on Screen-object. Do not resize or position canvas-surface."""
+
+    def __init__(self, canvas_size: tuple[int, int]) -> None:
+        super().__init__(canvas_size)
+
+    def update(self) -> None:
+        # Fixed-fit do not need to update scale or position.
+        pass
+
+
+class ScreenFixedCenter(Screen):
+    """Based on Screen-object. Do not resize canvas-surface."""
+
+    def __init__(self, canvas_size: tuple[int, int]) -> None:
+        super().__init__(canvas_size)
+
+    def update(self) -> None:
+        # FixedCenter-fit only needs to update position.
+        self.update_position()

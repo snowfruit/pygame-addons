@@ -4,7 +4,7 @@ import pygame
 
 
 class Screen:
-    """Screen-object used for base. Not for direct use."""
+    """Screen-object used for base. Not meant for direct use."""
 
     def __init__(self, canvas_size: tuple = (320, 240)) -> None:
         # Try to get available display-surface.
@@ -17,13 +17,11 @@ class Screen:
         self._frame_rate: float = 30.0
 
         # The scale-factor for the canvas-surface.
-        self._scale: int | float = 1
         self._scale_x: int | float = 1
         self._scale_y: int | float = 1
 
         # The zoom-factor for the canvas-surface.
         # TODO: Add zoom.
-        self._zoom: int | float = 1
         self._zoom_x: int | float = 1
         self._zoom_y: int | float = 1
 
@@ -49,7 +47,7 @@ class Screen:
 
     @property
     def frame_rate(self) -> float:
-        """Only 'frame-rate'-value. Does not set the application frame_rate."""
+        """Only 'frame rate'-value. Does not controll the frame rate."""
         return self._frame_rate
 
     @frame_rate.setter
@@ -57,13 +55,14 @@ class Screen:
         self._frame_rate = frame_rate
 
     @property
-    def scale(self) -> int | float:
-        """Scale-value used when canvas-surface is scaled equal on x and y."""
-        return self._scale
+    def scale(self) -> tuple[int | float, int | float]:
+        """Return scale_x and scale_y as tuple."""
+        return (self.scale_x, self.scale_y)
 
     @scale.setter
-    def scale(self, value: int | float) -> None:
-        self._scale = value
+    def scale(self, value: tuple[int | float, int | float]) -> None:
+        self.scale_x = value[0]
+        self.scale_y = value[1]
 
     @property
     def scale_x(self) -> int | float:
@@ -166,8 +165,8 @@ class Screen:
     def update_scale(self) -> None:
         """Update variables relavant to scale."""
         # Calculate the scale-factor for the canvas-surface.
-        self.scale_x: int | float = self.screen.get_width() / self.canvas.get_width()
-        self.scale_y: int | float = self.screen.get_height() / self.canvas.get_height()
+        self.scale_x: float = self.screen.get_width() / self.canvas.get_width()
+        self.scale_y: float = self.screen.get_height() / self.canvas.get_height()
 
     def update(self) -> None:
         """Method that calls all relevant update-methods."""
@@ -176,21 +175,23 @@ class Screen:
 
     def update_position(self) -> None:
         """Update variables relavant to position."""
+        # scale = pygame.math.Vector2(self.scale)
+
         # Get the center-position for the screen-surface.
         # screen_center = pygame.math.Vector2(self.screen.get_rect().center)
         screen_center_x, screen_center_y = self.screen.get_rect().center
 
         # Get the center-position for the canvas-surface.
-        # screen_center = pygame.math.Vector2(self.screen.get_rect().center)
         canvas_center_x, canvas_center_y = self.canvas.get_rect().center
 
         # Add the wanted scale.
-        canvas_center_x *= self.scale
-        canvas_center_y *= self.scale
+        canvas_center_x *= self.scale_x
+        canvas_center_y *= self.scale_y
 
         # Calculate the new canvas-position.
-        canvas_x: int = screen_center_x - canvas_center_x
-        canvas_y: int = screen_center_y - canvas_center_y
+        # TODO: Is there a problem with rounding?
+        canvas_x: int = math.floor(screen_center_x - canvas_center_x)
+        canvas_y: int = math.floor(screen_center_y - canvas_center_y)
 
         self.position = (canvas_x, canvas_y)
 
